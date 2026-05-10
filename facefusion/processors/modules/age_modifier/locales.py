@@ -13,6 +13,19 @@ LOCALES : Locales =\
 		{
 			'direction_slider': 'AGE MODIFIER DIRECTION',
 			'model_dropdown': 'AGE MODIFIER MODEL'
+		},
+	},
+	'zh':
+	{
+		'help':
+		{
+			'model': '选择用于改变年龄的模型',
+			'direction': '指定年龄修改的方向'
+		},
+		'uis':
+		{
+			'direction_slider': '年龄修改方向',
+			'model_dropdown': '年龄修改模型'
 		}
 	}
-}
+	}

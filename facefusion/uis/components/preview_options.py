@@ -5,6 +5,13 @@ import gradio
 from facefusion import state_manager, translator
 from facefusion.filesystem import is_video
 from facefusion.uis import choices as uis_choices
+
+PREVIEW_MODE_LABELS =\
+{
+	'default': '默认',
+	'frame-by-frame': '逐帧对比',
+	'face-by-face': '逐脸对比'
+}
 from facefusion.uis.core import get_ui_components, register_ui_component
 from facefusion.uis.types import ComponentOptions
 from facefusion.vision import count_video_frame_total
@@ -34,7 +41,7 @@ def render() -> None:
 		PREVIEW_MODE_DROPDOWN = gradio.Dropdown(
 			label = translator.get('uis.preview_mode_dropdown'),
 			value = uis_choices.preview_modes[0],
-			choices = uis_choices.preview_modes,
+			choices = [ (PREVIEW_MODE_LABELS.get(choice, choice), choice) for choice in uis_choices.preview_modes ],
 			visible = True
 		)
 		PREVIEW_RESOLUTION_DROPDOWN = gradio.Dropdown(

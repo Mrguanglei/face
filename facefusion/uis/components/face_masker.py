@@ -4,6 +4,14 @@ import gradio
 
 import facefusion.choices
 from facefusion import face_masker, state_manager, translator
+
+FACE_MASK_TYPE_LABELS =\
+{
+	'box': '方框',
+	'occlusion': '遮挡',
+	'area': '区域',
+	'region': '部位'
+}
 from facefusion.common_helper import calculate_float_step, calculate_int_step
 from facefusion.sanitizer import sanitize_int_range
 from facefusion.types import FaceMaskArea, FaceMaskRegion, FaceMaskType, FaceOccluderModel, FaceParserModel
@@ -51,7 +59,7 @@ def render() -> None:
 		)
 	FACE_MASK_TYPES_CHECKBOX_GROUP = gradio.CheckboxGroup(
 		label = translator.get('uis.face_mask_types_checkbox_group'),
-		choices = facefusion.choices.face_mask_types,
+		choices = [ (FACE_MASK_TYPE_LABELS.get(choice, choice), choice) for choice in facefusion.choices.face_mask_types ],
 		value = state_manager.get_item('face_mask_types')
 	)
 	FACE_MASK_AREAS_CHECKBOX_GROUP = gradio.CheckboxGroup(

@@ -4,7 +4,7 @@ from typing import Optional
 from facefusion.types import Language, LocalePoolSet, Locales
 
 LOCALE_POOL_SET : LocalePoolSet = {}
-CURRENT_LANGUAGE : Language = 'en'
+CURRENT_LANGUAGE : Language = 'zh'
 
 
 def __autoload__(module_name : str) -> None:

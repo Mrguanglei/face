@@ -13,6 +13,19 @@ LOCALES : Locales =\
 		{
 			'blend_slider': 'FRAME ENHANCER BLEND',
 			'model_dropdown': 'FRAME ENHANCER MODEL'
+		},
+	},
+	'zh':
+	{
+		'help':
+		{
+			'model': '选择用于增强帧的模型',
+			'blend': '将增强后的帧与原始帧融合'
+		},
+		'uis':
+		{
+			'blend_slider': '帧增强融合度',
+			'model_dropdown': '帧增强模型'
 		}
 	}
-}
+	}

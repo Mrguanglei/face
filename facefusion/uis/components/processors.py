@@ -9,6 +9,21 @@ from facefusion.uis.core import register_ui_component
 
 PROCESSORS_CHECKBOX_GROUP : Optional[gradio.CheckboxGroup] = None
 
+PROCESSOR_LABELS =\
+{
+	'face_swapper': '换脸',
+	'age_modifier': '年龄修改',
+	'background_remover': '背景移除',
+	'deep_swapper': '深度换脸',
+	'expression_restorer': '表情恢复',
+	'face_debugger': '人脸调试',
+	'face_editor': '人脸编辑',
+	'face_enhancer': '人脸增强',
+	'frame_colorizer': '帧上色',
+	'frame_enhancer': '帧增强',
+	'lip_syncer': '唇形同步'
+}
+
 
 def render() -> None:
 	global PROCESSORS_CHECKBOX_GROUP
@@ -38,7 +53,7 @@ def update_processors(processors : List[str]) -> gradio.CheckboxGroup:
 	return gradio.CheckboxGroup(value = state_manager.get_item('processors'), choices = sort_processors(state_manager.get_item('processors')))
 
 
-def sort_processors(processors : List[str]) -> List[str]:
+def sort_processors(processors : List[str]) -> List[dict]:
 	available_processors = [ get_file_name(file_path) for file_path in resolve_file_paths('facefusion/processors/modules') ]
 	current_processors = []
 
@@ -46,4 +61,4 @@ def sort_processors(processors : List[str]) -> List[str]:
 		if processor in available_processors and processor not in current_processors:
 			current_processors.append(processor)
 
-	return current_processors
+	return [ (PROCESSOR_LABELS.get(processor, processor), processor) for processor in current_processors ]

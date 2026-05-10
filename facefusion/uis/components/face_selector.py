@@ -6,6 +6,34 @@ from gradio_rangeslider import RangeSlider
 
 import facefusion.choices
 from facefusion import state_manager, translator
+
+FACE_SELECTOR_ORDER_LABELS =\
+{
+	'left-right': '从左到右',
+	'right-left': '从右到左',
+	'top-bottom': '从上到下',
+	'bottom-top': '从下到上',
+	'small-large': '从小到大',
+	'large-small': '从大到小',
+	'best-worst': '从优到劣',
+	'worst-best': '从劣到优'
+}
+FACE_SELECTOR_GENDER_LABELS =\
+{
+	'none': '无',
+	'female': '女',
+	'male': '男'
+}
+FACE_SELECTOR_RACE_LABELS =\
+{
+	'none': '无',
+	'white': '白种人',
+	'black': '黑种人',
+	'latino': '拉丁裔',
+	'asian': '亚裔',
+	'indian': '印度人',
+	'arabic': '阿拉伯人'
+}
 from facefusion.common_helper import calculate_float_step, calculate_int_step
 from facefusion.face_analyser import get_many_faces
 from facefusion.face_selector import sort_and_filter_faces
@@ -60,17 +88,17 @@ def render() -> None:
 		with gradio.Row():
 			FACE_SELECTOR_ORDER_DROPDOWN = gradio.Dropdown(
 				label = translator.get('uis.face_selector_order_dropdown'),
-				choices = facefusion.choices.face_selector_orders,
+				choices = [ (FACE_SELECTOR_ORDER_LABELS.get(choice, choice), choice) for choice in facefusion.choices.face_selector_orders ],
 				value = state_manager.get_item('face_selector_order')
 			)
 			FACE_SELECTOR_GENDER_DROPDOWN = gradio.Dropdown(
 				label = translator.get('uis.face_selector_gender_dropdown'),
-				choices = [ 'none' ] + facefusion.choices.face_selector_genders,
+				choices = [ (FACE_SELECTOR_GENDER_LABELS.get(choice, choice), choice) for choice in [ 'none' ] + facefusion.choices.face_selector_genders ],
 				value = state_manager.get_item('face_selector_gender') or 'none'
 			)
 			FACE_SELECTOR_RACE_DROPDOWN = gradio.Dropdown(
 				label = translator.get('uis.face_selector_race_dropdown'),
-				choices = [ 'none' ] + facefusion.choices.face_selector_races,
+				choices = [ (FACE_SELECTOR_RACE_LABELS.get(choice, choice), choice) for choice in [ 'none' ] + facefusion.choices.face_selector_races ],
 				value = state_manager.get_item('face_selector_race') or 'none'
 			)
 		with gradio.Row():

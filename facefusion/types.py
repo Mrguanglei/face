@@ -325,7 +325,8 @@ StateKey = Literal\
 	'halt_on_error',
 	'job_id',
 	'job_status',
-	'step_index'
+	'step_index',
+	'face_swapper_source_map'
 ]
 State = TypedDict('State',
 {
@@ -395,7 +396,8 @@ State = TypedDict('State',
 	'halt_on_error' : bool,
 	'job_id' : str,
 	'job_status' : JobStatus,
-	'step_index' : int
+	'step_index' : int,
+	'face_swapper_source_map' : str
 })
 ApplyStateItem : TypeAlias = Callable[[Any, Any], None]
 StateSet : TypeAlias = Dict[AppContext, State]

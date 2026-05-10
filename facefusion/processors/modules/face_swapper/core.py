@@ -1,3 +1,5 @@
+import json
+import os
 from argparse import ArgumentParser
 from functools import lru_cache
 from typing import List, Optional, Tuple
@@ -518,7 +520,7 @@ def register_args(program : ArgumentParser) -> None:
 		face_swapper_pixel_boost_choices = face_swapper_choices.face_swapper_set.get(known_args.face_swapper_model)
 		group_processors.add_argument('--face-swapper-pixel-boost', help = translator.get('help.pixel_boost', __package__), default = config.get_str_value('processors', 'face_swapper_pixel_boost', get_first(face_swapper_pixel_boost_choices)), choices = face_swapper_pixel_boost_choices)
 		group_processors.add_argument('--face-swapper-weight', help = translator.get('help.weight', __package__), type = float, default = config.get_float_value('processors', 'face_swapper_weight', '0.5'), choices = face_swapper_choices.face_swapper_weight_range)
-		facefusion.jobs.job_store.register_step_keys([ 'face_swapper_model', 'face_swapper_pixel_boost', 'face_swapper_weight' ])
+		facefusion.jobs.job_store.register_step_keys([ 'face_swapper_model', 'face_swapper_pixel_boost', 'face_swapper_weight', 'face_swapper_source_map' ])
 
 
 def apply_args(args : Args, apply_state_item : ApplyStateItem) -> None:
@@ -535,17 +537,32 @@ def pre_check() -> bool:
 
 
 def pre_process(mode : ProcessMode) -> bool:
-	if not has_image(state_manager.get_item('source_paths')):
-		logger.error(translator.get('choose_image_source') + translator.get('exclamation_mark'), __name__)
-		return False
+	source_map_str = state_manager.get_item('face_swapper_source_map') or '{}'
+	source_map = json.loads(source_map_str) if source_map_str else {}
+	has_source_map = bool(source_map) and any(os.path.exists(p) for p in source_map.values())
 
-	source_image_paths = filter_image_paths(state_manager.get_item('source_paths'))
-	source_vision_frames = read_static_images(source_image_paths)
-	source_faces = get_many_faces(source_vision_frames)
+	if has_source_map:
+		for index, source_path in source_map.items():
+			if not os.path.exists(source_path):
+				logger.error(f'源图 #{int(index) + 1} 文件不存在' + translator.get('exclamation_mark'), __name__)
+				return False
+			source_vision_frame = read_static_image(source_path)
+			source_faces = get_many_faces([source_vision_frame])
+			if not get_one_face(source_faces):
+				logger.error(f'源图 #{int(index) + 1} 未检测到人脸' + translator.get('exclamation_mark'), __name__)
+				return False
+	else:
+		if not has_image(state_manager.get_item('source_paths')):
+			logger.error(translator.get('choose_image_source') + translator.get('exclamation_mark'), __name__)
+			return False
 
-	if not get_one_face(source_faces):
-		logger.error(translator.get('no_source_face_detected') + translator.get('exclamation_mark'), __name__)
-		return False
+		source_image_paths = filter_image_paths(state_manager.get_item('source_paths'))
+		source_vision_frames = read_static_images(source_image_paths)
+		source_faces = get_many_faces(source_vision_frames)
+
+		if not get_one_face(source_faces):
+			logger.error(translator.get('no_source_face_detected') + translator.get('exclamation_mark'), __name__)
+			return False
 
 	if mode in [ 'output', 'preview' ] and not is_image(state_manager.get_item('target_path')) and not is_video(state_manager.get_item('target_path')):
 		logger.error(translator.get('choose_image_or_video_target') + translator.get('exclamation_mark'), __name__)
@@ -757,18 +774,47 @@ def extract_source_face(source_vision_frames : List[VisionFrame]) -> Optional[Fa
 	return get_average_face(source_faces)
 
 
+def get_mapped_source_face(target_face_index : int) -> Optional[Face]:
+	source_map_str = state_manager.get_item('face_swapper_source_map') or '{}'
+
+	try:
+		source_map = json.loads(source_map_str)
+	except Exception:
+		return None
+
+	source_path = source_map.get(str(target_face_index))
+
+	if source_path and os.path.isfile(source_path):
+		source_vision_frame = read_static_image(source_path)
+		temp_faces = get_many_faces([source_vision_frame])
+		temp_faces = sort_faces_by_order(temp_faces, 'large-small')
+
+		if temp_faces:
+			return get_first(temp_faces)
+	return None
+
+
 def process_frame(inputs : FaceSwapperInputs) -> ProcessorOutputs:
 	reference_vision_frame = inputs.get('reference_vision_frame')
 	source_vision_frames = inputs.get('source_vision_frames')
 	target_vision_frame = inputs.get('target_vision_frame')
 	temp_vision_frame = inputs.get('temp_vision_frame')
 	temp_vision_mask = inputs.get('temp_vision_mask')
-	source_face = extract_source_face(source_vision_frames)
 	target_faces = select_faces(reference_vision_frame, target_vision_frame)
 
-	if source_face and target_faces:
-		for target_face in target_faces:
+	if target_faces:
+		source_map_str = state_manager.get_item('face_swapper_source_map') or '{}'
+		has_source_map = source_map_str and source_map_str != '{}'
+
+		for index, target_face in enumerate(target_faces):
 			target_face = scale_face(target_face, target_vision_frame, temp_vision_frame)
-			temp_vision_frame = swap_face(source_face, target_face, temp_vision_frame)
+
+			if has_source_map:
+				source_face = get_mapped_source_face(index)
+			else:
+				source_face = extract_source_face(source_vision_frames)
+
+			if source_face:
+				temp_vision_frame = swap_face(source_face, target_face, temp_vision_frame)
 
 	return temp_vision_frame, temp_vision_mask

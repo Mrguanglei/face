@@ -11,6 +11,17 @@ LOCALES : Locales =\
 		'uis':
 		{
 			'items_checkbox_group': 'FACE DEBUGGER ITEMS'
+		},
+	},
+	'zh':
+	{
+		'help':
+		{
+			'items': '加载一个或多个调试项目 (选项: {choices})'
+		},
+		'uis':
+		{
+			'items_checkbox_group': '人脸调试项目'
 		}
 	}
-}
+	}
