@@ -5,63 +5,16 @@
       <span class="version">v3.6.1</span>
     </header>
 
-    <!-- 目标文件上传 -->
-    <section class="section">
-      <h2>上传目标视频</h2>
-      <div
-        class="upload-area"
-        :class="{ 'has-preview': targetPreviewUrl }"
-        @click="!targetPreviewUrl && triggerTargetUpload()"
-        @dragover.prevent
-        @drop.prevent="handleTargetDrop"
-      >
-        <input
-          ref="targetInput"
-          type="file"
-          accept="video/*,image/*"
-          style="display: none"
-          @change="handleTargetChange"
-        />
-        <!-- 未上传时显示提示 -->
-        <template v-if="!targetPreviewUrl">
-          <el-icon :size="40" color="#888"><video-play /></el-icon>
-          <p>拖拽文件到此处 或 <em>点击上传</em></p>
-          <p class="hint">支持 MP4 | MOV | AVI | WEBM (≤ 300MB)</p>
-        </template>
-        <!-- 已上传时显示预览 -->
-        <template v-else>
-          <video
-            v-if="targetIsVideo"
-            :src="targetPreviewUrl"
-            controls
-            class="preview-media"
-            @click.stop
-          />
-          <img
-            v-else
-            :src="targetPreviewUrl"
-            class="preview-media"
-            @click.stop
-          />
-        </template>
-      </div>
-      <div v-if="targetFileName" class="file-name">已选择: {{ targetFileName }}</div>
-    </section>
 
-    <!-- 检测按钮 -->
-    <button class="detect-btn" :disabled="detecting || !targetFileName" @click="handleDetect">
-      <el-icon v-if="detecting" class="spin"><loading /></el-icon>
-      <span v-else>☺</span>
-      {{ detecting ? '检测中...' : '检测目标人脸' }}
-    </button>
-
-    <!-- 处理器选项 -->
-    <section class="section processor-section">
-      <div class="processor-header" @click="showProcessorOptions = !showProcessorOptions">
-        <h2>处理器选项</h2>
-        <span class="toggle-icon">{{ showProcessorOptions ? '▼' : '▶' }}</span>
-      </div>
-      <div v-if="showProcessorOptions" class="processor-body">
+    <div class="main-layout" style="display: flex; flex-direction: row;">
+      <!-- 左侧：处理器选项 -->
+      <div class="left-sidebar">
+        <section class="section processor-section">
+          <div class="processor-header" @click="showProcessorOptions = !showProcessorOptions">
+            <h2>处理器选项</h2>
+            <span class="toggle-icon">{{ showProcessorOptions ? '▼' : '▶' }}</span>
+          </div>
+          <div v-if="showProcessorOptions" class="processor-body">
         <!-- 处理器复选框 -->
         <div class="processor-chips">
           <label class="chip" :class="{ active: selectedProcessors.includes('face_swapper') }">
@@ -157,11 +110,77 @@
             <option value="ultra_sharp_2_x4">Ultra Sharp 2 x4</option>
           </select>
         </div>
+
+        <!-- 并发线程数 -->
+        <div class="processor-card">
+          <h4>并发线程数: {{ executionThreadCount }}</h4>
+          <input
+            type="range"
+            v-model.number="executionThreadCount"
+            min="1"
+            max="16"
+            step="1"
+            class="slider"
+          />
+          <p class="hint">内存 32GB 建议 8 线程，内存小请调低避免崩溃</p>
+        </div>
       </div>
     </section>
 
-    <!-- 人脸列表 -->
-    <section v-if="faces.length > 0" class="section face-section">
+      </div>
+
+      <!-- 右侧：人脸列表 + 操作 -->
+      <div class="right-content">
+            <!-- 目标文件上传 -->
+            <section class="section">
+              <h2>上传目标视频</h2>
+              <div
+                class="upload-area"
+                :class="{ 'has-preview': targetPreviewUrl }"
+                @click="!targetPreviewUrl && triggerTargetUpload()"
+                @dragover.prevent
+                @drop.prevent="handleTargetDrop"
+              >
+                <input
+                  ref="targetInput"
+                  type="file"
+                  accept="video/*,image/*"
+                  style="display: none"
+                  @change="handleTargetChange"
+                />
+                <!-- 未上传时显示提示 -->
+                <template v-if="!targetPreviewUrl">
+                  <el-icon :size="40" color="#888"><video-play /></el-icon>
+                  <p>拖拽文件到此处 或 <em>点击上传</em></p>
+                  <p class="hint">支持 MP4 | MOV | AVI | WEBM (≤ 300MB)</p>
+                </template>
+                <!-- 已上传时显示预览 -->
+                <template v-else>
+                  <video
+                    v-if="targetIsVideo"
+                    :src="targetPreviewUrl"
+                    controls
+                    class="preview-media"
+                    @click.stop
+                  />
+                  <img
+                    v-else
+                    :src="targetPreviewUrl"
+                    class="preview-media"
+                    @click.stop
+                  />
+                </template>
+              </div>
+              <div v-if="targetFileName" class="file-name">已选择: {{ targetFileName }}</div>
+            </section>
+            <!-- 检测按钮 -->
+            <button class="detect-btn" :disabled="detecting || !targetFileName" @click="handleDetect">
+              <el-icon v-if="detecting" class="spin"><loading /></el-icon>
+              <span v-else>☺</span>
+              {{ detecting ? '检测中...' : '检测目标人脸' }}
+            </button>
+        <!-- 人脸列表 -->
+        <section v-if="faces.length > 0" class="section face-section">
       <h2>上传人脸照片</h2>
       <div class="face-grid">
         <div v-for="face in faces" :key="face.index" class="face-card">
@@ -203,22 +222,24 @@
       <span class="progress-text">{{ processing ? '后端处理中，请稍候...' : '准备中...' }}</span>
     </div>
 
-    <!-- 结果 -->
-    <div v-if="resultUrl" class="result-section">
-      <h2>换脸完成</h2>
-      <a :href="resultUrl" download class="download-link">点击下载结果</a>
+        <!-- 结果 -->
+        <div v-if="resultUrl" class="result-section">
+          <h2>换脸完成</h2>
+          <a :href="resultUrl" download class="download-link">点击下载结果</a>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { ref, reactive } from 'vue'
 import { VideoPlay, Loading, Camera } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { uploadTarget, uploadSource, detectFaces, setSourceMap, startSwap, getProcessorOptions } from './api'
+import { uploadTarget, uploadSource, detectFaces, setSourceMap, startSwap } from './api'
 
 const targetInput = ref<HTMLInputElement>()
-const sourceInputs = reactive<Record<number, HTMLInputElement>>({})
+const sourceInputs = reactive<Record<number, any>>({})
 const targetFileName = ref('')
 const targetPreviewUrl = ref('')
 const targetIsVideo = ref(false)
@@ -231,7 +252,8 @@ const sourcePreviews = reactive<Record<number, string>>({})
 const resultUrl = ref('')
 const processing = ref(false)
 const ws = ref<WebSocket | null>(null)
-const processorOptions = ref<Record<string, any>>({})
+// processor options are built dynamically in handleSwap
+const executionThreadCount = ref(8)
 const selectedProcessors = ref<string[]>(['face_swapper'])
 const processorConfigs = reactive<Record<string, any>>({
   face_swapper: { model: 'hyperswap_1a_256', pixel_boost: '512x512', weight: 0.5 },
@@ -371,7 +393,7 @@ async function handleSwap() {
       processorOptions.frame_enhancer_model = processorConfigs.frame_enhancer.model
     }
 
-    const res = await startSwap(selectedProcessors.value, processorOptions)
+    const res = await startSwap(selectedProcessors.value, processorOptions, executionThreadCount.value)
     if (res.success) {
       resultUrl.value = '/uploads/' + res.output_path.split('/').pop()
       ElMessage.success('换脸完成！')
@@ -389,13 +411,31 @@ async function handleSwap() {
 
 <style scoped>
 .facefusion-app {
-  max-width: 720px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 24px;
   background: #1e1e2e;
   min-height: 100vh;
   color: #fff;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.main-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.left-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
+.right-content {
+  flex: 1;
+  min-width: 0;
 }
 
 .app-header {

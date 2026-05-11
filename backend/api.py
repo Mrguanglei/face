@@ -232,6 +232,26 @@ async def start_swap(data : dict) -> dict:
 			video_path = state_manager.get_item('target_path')
 			if video_path:
 				state_manager.set_item('output_video_fps', detect_video_fps(video_path))
+		# 并发线程数（前端传入，默认根据内存自动判断）
+		thread_count = data.get('execution_thread_count')
+		if thread_count is None:
+			import platform
+			# macOS 粗略估计：8GB→1线程, 16GB→4线程, 32GB→8线程
+			total_gb = 32  # 默认保守值
+			try:
+				import subprocess
+				result = subprocess.run(['sysctl', '-n', 'hw.memsize'], capture_output=True, text=True)
+				total_bytes = int(result.stdout.strip())
+				total_gb = total_bytes // (1024 ** 3)
+			except Exception:
+				pass
+			if total_gb >= 32:
+				thread_count = 8
+			elif total_gb >= 16:
+				thread_count = 4
+			else:
+				thread_count = 1
+		state_manager.set_item('execution_thread_count', thread_count)
 
 		# 默认参考帧
 		if state_manager.get_item('reference_frame_number') is None:

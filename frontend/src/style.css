@@ -8,3 +8,22 @@ body {
   background: #1a1a2e;
   font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
 }
+
+/* Global layout styles - force flex */
+.main-layout {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 24px !important;
+  align-items: flex-start !important;
+}
+
+.left-sidebar {
+  width: 320px !important;
+  flex-shrink: 0 !important;
+  align-self: flex-start !important;
+}
+
+.right-content {
+  flex: 1 !important;
+  min-width: 0 !important;
+}
