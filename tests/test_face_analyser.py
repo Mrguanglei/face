@@ -2,11 +2,12 @@ import subprocess
 
 import pytest
 
-from facefusion import face_classifier, face_detector, face_landmarker, face_recognizer, state_manager
-from facefusion.download import conditional_download
-from facefusion.face_analyser import get_many_faces
-from facefusion.face_store import clear_static_faces
-from facefusion.vision import read_static_image
+from facefusion import state_manager
+from facefusion.face import face_classifier, face_detector, face_landmarker, face_recognizer
+from facefusion.utils.download import conditional_download
+from facefusion.face.face_analyser import get_many_faces
+from facefusion.face.face_store import clear_static_faces
+from facefusion.media.vision import read_static_image
 from .helper import get_test_example_file, get_test_examples_directory
 
 

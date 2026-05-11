@@ -3,8 +3,9 @@ from unittest.mock import patch
 import pytest
 from onnxruntime import InferenceSession
 
-from facefusion import content_analyser, state_manager
-from facefusion.inference_manager import INFERENCE_POOL_SET, get_inference_pool
+from facefusion import state_manager
+from facefusion.utils import content_analyser
+from facefusion.utils.inference_manager import INFERENCE_POOL_SET, get_inference_pool
 
 
 @pytest.fixture(scope = 'module', autouse = True)
@@ -19,14 +20,14 @@ def test_get_inference_pool() -> None:
 	model_names = [ 'nsfw_1', 'nsfw_2', 'nsfw_3' ]
 	_, model_source_set = content_analyser.collect_model_downloads()
 
-	with patch('facefusion.inference_manager.detect_app_context', return_value = 'cli'):
-		get_inference_pool('facefusion.content_analyser', model_names, model_source_set)
+	with patch('facefusion.utils.inference_manager.detect_app_context', return_value = 'cli'):
+		get_inference_pool('facefusion.utils.content_analyser', model_names, model_source_set)
 
-		assert isinstance(INFERENCE_POOL_SET.get('cli').get('facefusion.content_analyser.nsfw_1.nsfw_2.nsfw_3.0.cpu').get('nsfw_1'), InferenceSession)
+		assert isinstance(INFERENCE_POOL_SET.get('cli').get('facefusion.utils.content_analyser.nsfw_1.nsfw_2.nsfw_3.0.cpu').get('nsfw_1'), InferenceSession)
 
-	with patch('facefusion.inference_manager.detect_app_context', return_value = 'ui'):
-		get_inference_pool('facefusion.content_analyser', model_names, model_source_set)
+	with patch('facefusion.utils.inference_manager.detect_app_context', return_value = 'ui'):
+		get_inference_pool('facefusion.utils.content_analyser', model_names, model_source_set)
 
-		assert isinstance(INFERENCE_POOL_SET.get('cli').get('facefusion.content_analyser.nsfw_1.nsfw_2.nsfw_3.0.cpu').get('nsfw_1'), InferenceSession)
+		assert isinstance(INFERENCE_POOL_SET.get('cli').get('facefusion.utils.content_analyser.nsfw_1.nsfw_2.nsfw_3.0.cpu').get('nsfw_1'), InferenceSession)
 
-	assert INFERENCE_POOL_SET.get('cli').get('facefusion.content_analyser.nsfw_1.nsfw_2.nsfw_3.0.cpu').get('nsfw_1') == INFERENCE_POOL_SET.get('ui').get('facefusion.content_analyser.nsfw_1.nsfw_2.nsfw_3.0.cpu').get('nsfw_1')
+	assert INFERENCE_POOL_SET.get('cli').get('facefusion.utils.content_analyser.nsfw_1.nsfw_2.nsfw_3.0.cpu').get('nsfw_1') == INFERENCE_POOL_SET.get('ui').get('facefusion.utils.content_analyser.nsfw_1.nsfw_2.nsfw_3.0.cpu').get('nsfw_1')

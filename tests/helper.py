@@ -1,7 +1,7 @@
 import os
 import tempfile
 
-from facefusion.filesystem import create_directory, is_directory, is_file, remove_directory
+from facefusion.utils.filesystem import create_directory, is_directory, is_file, remove_directory
 from facefusion.types import JobStatus
 
 

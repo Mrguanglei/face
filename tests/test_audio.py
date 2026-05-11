@@ -2,8 +2,8 @@ import subprocess
 
 import pytest
 
-from facefusion.audio import get_audio_frame, read_static_audio
-from facefusion.download import conditional_download
+from facefusion.media.audio import get_audio_frame, read_static_audio
+from facefusion.utils.download import conditional_download
 from .helper import get_test_example_file, get_test_examples_directory
 
 
