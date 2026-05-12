@@ -124,6 +124,22 @@
           />
           <p class="hint">内存 32GB 建议 8 线程，内存小请调低避免崩溃</p>
         </div>
+
+        <!-- 加速引擎 -->
+        <div class="processor-card">
+          <h4>加速引擎</h4>
+          <select v-model="executionProvider" class="select-box">
+            <option value="auto">自动（推荐）</option>
+            <option value="CPUExecutionProvider">CPU（通用）</option>
+            <option value="CoreMLExecutionProvider">Apple Neural Engine（Mac）</option>
+            <option value="CUDAExecutionProvider">NVIDIA CUDA（Win/Linux）</option>
+            <option value="DirectMLExecutionProvider">DirectML（Win）</option>
+            <option value="OpenVINOExecutionProvider">OpenVINO（Intel）</option>
+          </select>
+          <p class="hint">
+            Mac 推荐 Apple Neural Engine，NVIDIA 显卡推荐 CUDA
+          </p>
+        </div>
       </div>
     </section>
 
@@ -254,6 +270,7 @@ const processing = ref(false)
 const ws = ref<WebSocket | null>(null)
 // processor options are built dynamically in handleSwap
 const executionThreadCount = ref(8)
+const executionProvider = ref('auto')
 const selectedProcessors = ref<string[]>(['face_swapper'])
 const processorConfigs = reactive<Record<string, any>>({
   face_swapper: { model: 'hyperswap_1a_256', pixel_boost: '512x512', weight: 0.5 },
@@ -393,7 +410,7 @@ async function handleSwap() {
       processorOptions.frame_enhancer_model = processorConfigs.frame_enhancer.model
     }
 
-    const res = await startSwap(selectedProcessors.value, processorOptions, executionThreadCount.value)
+    const res = await startSwap(selectedProcessors.value, processorOptions, executionThreadCount.value, executionProvider.value)
     if (res.success) {
       resultUrl.value = '/uploads/' + res.output_path.split('/').pop()
       ElMessage.success('换脸完成！')

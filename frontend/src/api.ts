@@ -38,7 +38,7 @@ export async function getProcessorOptions() {
   return res.data
 }
 
-export async function startSwap(processors: string[], processorOptions: Record<string, any>, executionThreadCount: number) {
-  const res = await api.post('/start-swap', { processors, processor_options: processorOptions, execution_thread_count: executionThreadCount })
+export async function startSwap(processors: string[], processorOptions: Record<string, any>, executionThreadCount: number, executionProvider: string) {
+  const res = await api.post('/start-swap', { processors, processor_options: processorOptions, execution_thread_count: executionThreadCount, execution_provider: executionProvider })
   return res.data
 }

@@ -253,6 +253,11 @@ async def start_swap(data : dict) -> dict:
 				thread_count = 1
 		state_manager.set_item('execution_thread_count', thread_count)
 
+		# 加速引擎（执行提供程序）
+		execution_provider = data.get('execution_provider', 'auto')
+		if execution_provider and execution_provider != 'auto':
+			state_manager.set_item('execution_providers', [execution_provider])
+
 		# 默认参考帧
 		if state_manager.get_item('reference_frame_number') is None:
 			state_manager.set_item('reference_frame_number', 1)
